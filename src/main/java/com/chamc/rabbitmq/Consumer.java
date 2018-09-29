@@ -44,24 +44,23 @@ public class Consumer {
 		//绑定
 		channel.queueBind(queueName, exchangeName, routingKey);
 		
+		channel.basicQos(1);
 		//消费消息
-		while(true) {
-			channel.basicConsume(queueName, false, "", new DefaultConsumer(channel) {
-				@Override
-			    public void handleDelivery(String consumerTag,
-			                               Envelope envelope,
-			                               AMQP.BasicProperties properties,
-			                               byte[] body)
-			        throws IOException
-			    {
-					System.out.println("----------------------------------------------");
-					System.out.println("路由:" + envelope.getRoutingKey());
-					System.out.println("类型:" + properties.getContentType());
-					//确认消息
-					channel.basicAck(envelope.getDeliveryTag(), false);
-					System.out.println("内容:" + new String(body, "UTF-8"));
-			    }
-			});
-		}	
+		channel.basicConsume(queueName, false, "", new DefaultConsumer(channel) {
+			@Override
+			public void handleDelivery(String consumerTag,
+			                           Envelope envelope,
+			                           AMQP.BasicProperties properties,
+			                           byte[] body)
+			throws IOException
+			{
+				System.out.println("----------------------------------------------");
+				System.out.println("路由:" + envelope.getRoutingKey());
+				System.out.println("类型:" + properties.getContentType());
+				//确认消息
+				channel.basicAck(envelope.getDeliveryTag(), false);
+				System.out.println("内容:" + new String(body, "UTF-8"));
+			}
+		});	
 	}
 }
