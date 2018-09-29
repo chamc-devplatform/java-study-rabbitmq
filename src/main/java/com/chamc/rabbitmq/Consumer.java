@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -16,19 +17,25 @@ public class Consumer {
 		
 		//设置连接基本配置
 		ConnectionFactory factory = new ConnectionFactory();
-		factory.setUsername("guest");
-		factory.setPassword("guest");
-		factory.setHost("localhost");
+		factory.setUsername("root");
+		factory.setPassword("root");
+		factory.setVirtualHost("vhost_one");
+		factory.setAutomaticRecoveryEnabled(true);
 		
 		//建立连接
-		Connection connection = factory.newConnection();
+		Address[] addrs = new Address[4];
+		addrs[0] = new Address("10.1.1.135", 5672);
+		addrs[1] = new Address("10.1.1.136", 5672);
+		addrs[2] = new Address("10.1.1.137", 5672);
+		addrs[3] = new Address("10.1.1.144", 5672);
+		Connection connection = factory.newConnection(addrs);
 	
 		//建立信道
 		Channel channel = connection.createChannel();
 		
 		//声明exchange
 		String exchangeName = "hello-exchange";
-		channel.exchangeDeclare("hello-exchange", "direct", false);
+		channel.exchangeDeclare("hello-exchange", "direct", true);
 		
 		//声明队列
 		String queueName = channel.queueDeclare().getQueue();
@@ -36,7 +43,6 @@ public class Consumer {
 		
 		//绑定
 		channel.queueBind(queueName, exchangeName, routingKey);
-		
 		
 		//消费消息
 		while(true) {
